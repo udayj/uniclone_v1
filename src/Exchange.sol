@@ -3,17 +3,14 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "./interfaces/IExchange.sol";
 
 interface IFactory {
 
     function getExchange(address _tokenAddress) external returns(address);
 }
 
-interface IExchange {
 
-    function getTokenAmount(uint256 ethSold) external returns(uint256);
-    function ethToTokenSwap(uint256 _minToken) external payable;
-}
 contract Exchange is ERC20{
 
     address public tokenAddress;
@@ -110,17 +107,17 @@ contract Exchange is ERC20{
     function tokenToEthSwap(uint256 _tokenSold, uint256 _minEth) public {
 
         uint256 ethAmount = getEthAmount(_tokenSold);
-        require(ethAmount > _minEth, "Slippage exceeds allowance");
+        require(ethAmount >= _minEth, "Slippage exceeds allowance");
 
         IERC20(tokenAddress).transferFrom(msg.sender,address(this),_tokenSold);
 
-        payable(address(this)).transfer(ethAmount);
+        payable(msg.sender).transfer(ethAmount);
     }
 
     function ethToTokenSwap(uint256 _minToken) public payable {
 
         uint256 tokenAmount = getTokenAmount(msg.value);
-        require(tokenAmount > _minToken, "Slippage exceeds allowance");
+        require(tokenAmount >= _minToken, "Slippage exceeds allowance");
         IERC20(tokenAddress).transfer(msg.sender,tokenAmount);
     }
 
