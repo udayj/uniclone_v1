@@ -82,7 +82,7 @@ contract Exchange is ERC20{
         uint256 inputReserve,
         uint256 outputReserve
 
-    ) private view returns(uint256) {
+    ) internal view returns(uint256) {
 
         require(inputReserve > 0 && outputReserve > 0, "invalid reserves");
 
@@ -116,7 +116,8 @@ contract Exchange is ERC20{
 
     function ethToTokenSwap(uint256 _minToken) public payable {
 
-        uint256 tokenAmount = getTokenAmount(msg.value);
+        uint256 tokenReserve = getReserve();
+        uint256 tokenAmount = getAmount(msg.value, address(this).balance - msg.value, tokenReserve);
         require(tokenAmount >= _minToken, "Slippage exceeds allowance");
         IERC20(tokenAddress).transfer(msg.sender,tokenAmount);
     }

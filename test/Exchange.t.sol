@@ -20,8 +20,10 @@ contract ExchangeTest is Test {
 
     }
 
-    function testBasicLiquidityFlow() public {
-        
+    //test addition of liquidity, token to eth swap, removal of liquidity
+    function testAddRemoveLiquidityFlow() public {
+
+      
        uint256 initialBalance = token.balanceOf(address(this));
        token.approve(address(exchange),2000);
        console.log(address(this).balance);
@@ -58,6 +60,34 @@ contract ExchangeTest is Test {
        
 
        
+    }
+
+    function testTokenToTokenSwap() public {
+
+       Token token2 = new Token("Sample Token","STK1",100000);
+       address exchangeAddress = factory.createExchange(address(token2));
+       IExchange exchange_2 = IExchange(exchangeAddress);
+        
+       uint256 initialBalance = token.balanceOf(address(this));
+       uint256 initialBalanceToken2 = token2.balanceOf(address(this));
+       token.approve(address(exchange),2000);
+       console.log(address(this).balance);
+       uint256 initialEthBalance = address(this).balance;
+       uint256 liquidityMinted = exchange.addLiquidity{value: 1000}(2000);
+
+       assertEq(liquidityMinted,1000);
+
+       token2.approve(address(exchange_2), 4000);
+       uint256 liquidityMinted2=exchange_2.addLiquidity{value:1000}(4000);
+       assertEq(liquidityMinted2,1000);
+
+       token.approve(address(exchange),100);
+       console.log(exchange.getEthAmount(100));
+       console.log(exchange_2.getTokenAmount(47));
+       exchange.tokenToTokenSwap(100, 177, address(token2));
+      
+       assertEq(token2.balanceOf(address(this)),initialBalanceToken2-4000+177);
+    
     }
 
     receive() external payable {}
