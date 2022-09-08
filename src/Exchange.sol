@@ -126,6 +126,8 @@ contract Exchange is ERC20{
 
         address exchangeAddress = IFactory(factoryAddress).getExchange(_tokenAddress);
 
+        require(exchangeAddress!=address(this), "Cannot swap same tokens");
+        
         uint256 ethAmount = getEthAmount(_tokensSold);
 
         IExchange exchange = IExchange(exchangeAddress);
